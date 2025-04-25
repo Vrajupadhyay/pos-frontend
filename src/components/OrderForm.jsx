@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 
 const OrderForm = () => {
   const [userId, setUserId] = useState(1);
@@ -7,68 +6,64 @@ const OrderForm = () => {
   const [quantity, setQuantity] = useState('');
   const [orders, setOrders] = useState([]);
 
-  // Fake initial order data
   const fakeOrders = [
     { order_id: 1, product_name: 'Milk', quantity: 2, username: 'John Doe' },
     { order_id: 2, product_name: 'Cheese', quantity: 1, username: 'Jane Smith' },
   ];
 
   useEffect(() => {
-    // Simulate fetching orders with fake data
     setOrders(fakeOrders);
   }, []);
 
-  const placeOrder = async () => {
-    try {
-      // Create a new order object
-      const newOrder = {
-        order_id: orders.length + 1, // Generate a fake order ID
-        product_name: `Product ${productId}`, // Simulate product name
-        quantity: parseInt(quantity, 10),
-        username: `User ${userId}`, // Simulate username
-      };
+  const placeOrder = () => {
+    const newOrder = {
+      order_id: orders.length + 1,
+      product_name: `Product ${productId}`,
+      quantity: parseInt(quantity, 10),
+      username: `User ${userId}`,
+    };
 
-      // Temporarily add the new order to the local state
-      setOrders([...orders, newOrder]);
-
-      // Clear the input fields
-      setProductId('');
-      setQuantity('');
-
-      // Simulate a success message
-      alert('Order placed! ID: ' + newOrder.order_id);
-
-      // Optionally, you can still call the backend API here
-      // await axios.post('http://localhost:4000/orders', {
-      //   user_id: userId,
-      //   product_id: productId,
-      //   quantity
-      // });
-    } catch (err) {
-      alert('Error placing order');
-    }
+    setOrders([...orders, newOrder]);
+    setProductId('');
+    setQuantity('');
+    alert('Order placed! ID: ' + newOrder.order_id);
   };
 
   return (
     <div>
-      <h2>Place Order</h2>
-      <input
-        placeholder="Product ID"
-        value={productId}
-        onChange={e => setProductId(e.target.value)}
-      />
-      <input
-        placeholder="Quantity"
-        value={quantity}
-        onChange={e => setQuantity(e.target.value)}
-      />
-      <button onClick={placeOrder}>Order</button>
+      <h2 className="text-xl font-bold mb-4">Place a New Order</h2>
+      <div className="mb-4 space-y-3">
+        <input
+          className="w-full border px-3 py-2 rounded"
+          placeholder="Product ID"
+          value={productId}
+          onChange={e => setProductId(e.target.value)}
+        />
+        <input
+          className="w-full border px-3 py-2 rounded"
+          placeholder="Quantity"
+          value={quantity}
+          onChange={e => setQuantity(e.target.value)}
+        />
+        <button
+          className="w-full bg-blue-600 text-white py-2 rounded"
+          onClick={placeOrder}
+        >
+          Place Order
+        </button>
+      </div>
 
-      <h2>Orders</h2>
-      <ul>
+      <h2 className="text-lg font-semibold mt-6 mb-2">Recent Orders</h2>
+      <ul className="space-y-2">
         {orders.map(order => (
-          <li key={order.order_id}>
-            {order.product_name} - Quantity: {order.quantity} (Ordered by: {order.username})
+          <li
+            key={order.order_id}
+            className="p-3 border border-gray-300 rounded-md"
+          >
+            <div className="font-medium">{order.product_name}</div>
+            <div className="text-sm text-gray-600">
+              Quantity: {order.quantity} | Ordered by: {order.username}
+            </div>
           </li>
         ))}
       </ul>
