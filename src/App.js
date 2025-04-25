@@ -13,6 +13,7 @@ function App() {
   const [status, setStatus] = useState('online');
   const [unlocked, setUnlocked] = useState(false);
   const [showSplash, setShowSplash] = useState(true); // State to control splash screen visibility
+  const [isError, setIsError] = useState(false); // State to track internet connection error
 
   useEffect(() => {
     const isUnlocked = localStorage.getItem('unlocked') === 'true';
@@ -20,12 +21,24 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const handleOnline = () => setStatus('online');
-    const handleOffline = () => setStatus('offline');
+    const handleOnline = () => {
+      setStatus('online');
+      setIsError(false);  // Reset error when back online
+    };
+    const handleOffline = () => {
+      setStatus('offline');
+      setIsError(true);  // Show error when offline
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    navigator.onLine ? setStatus('online') : setStatus('offline');
+    
+    if (navigator.onLine) {
+      setStatus('online');
+    } else {
+      setStatus('offline');
+      setIsError(true); // Set error if initially offline
+    }
 
     return () => {
       window.removeEventListener('online', handleOnline);
@@ -54,6 +67,16 @@ function App() {
 
   if (!unlocked) {
     return <AppLock onUnlock={handleUnlock} />;
+  }
+
+  // Show error message if offline
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 font-sans flex flex-col justify-center items-center">
+        <h2 className="text-red-600 text-xl">No internet connection detected.</h2>
+        <p className="text-gray-600 text-sm">Please check your connection and try again.</p>
+      </div>
+    );
   }
 
   return (

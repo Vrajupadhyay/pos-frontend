@@ -4,10 +4,10 @@ const ImageUpload = () => {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
     const [status, setStatus] = useState('offline');
-    const [offlineImages, setOfflineImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [imageCategory, setImageCategory] = useState('');
     const [toastMessage, setToastMessage] = useState('');
+    const [uploadedImages, setUploadedImages] = useState([]);
     const [imageDetails, setImageDetails] = useState(null);
     const [showImageDetailsModal, setShowImageDetailsModal] = useState(false);
 
@@ -24,8 +24,8 @@ const ImageUpload = () => {
             setStatus('offline');
         }
 
-        const savedImages = JSON.parse(localStorage.getItem('offlineImages') || '[]');
-        setOfflineImages(savedImages);
+        const storedImages = JSON.parse(localStorage.getItem('uploadedImages')) || [];
+        setUploadedImages(storedImages);
 
         return () => {
             window.removeEventListener('online', handleOnline);
@@ -36,7 +36,6 @@ const ImageUpload = () => {
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         setImage(file);
-        setImageDetails(getImageDetails(file));
 
         if (file) {
             const reader = new FileReader();
@@ -47,48 +46,42 @@ const ImageUpload = () => {
         }
 
         if (status === 'online') {
-            uploadImage(file);
-        } else {
-            storeImageOffline(file);
+            uploadImage(file, e);
         }
     };
 
-    const getImageDetails = (file) => {
-        const dimensions = `${file.width}x${file.height}`;
-        const size = (file.size / 1024).toFixed(2) + ' KB';
-        const resolution = `${file.width}x${file.height} px`;
-        return { dimensions, size, resolution };
-    };
-
-    const storeImageOffline = (file) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const offlineImage = { name: file.name, data: reader.result, category: imageCategory, status: 'Waiting' };
-            const savedImages = JSON.parse(localStorage.getItem('offlineImages') || '[]');
-            savedImages.push(offlineImage);
-            localStorage.setItem('offlineImages', JSON.stringify(savedImages));
-            setOfflineImages(savedImages);
-            setToastMessage('Image saved offline.');
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const uploadImage = (file) => {
+    const uploadImage = (file, e) => {
         setLoading(true);
         setToastMessage('Uploading image...');
         setTimeout(() => {
-            // Simulate a successful upload after 3 seconds
+            const newImage = {
+                name: file.name,
+                data: URL.createObjectURL(file),
+                category: imageCategory,
+                status: 'Uploaded',
+                id: new Date().toISOString(),
+            };
+
+            const updatedImages = [...uploadedImages, newImage];
+            setUploadedImages(updatedImages);
+
+            localStorage.setItem('uploadedImages', JSON.stringify(updatedImages));
+
             setLoading(false);
             setToastMessage('Image uploaded successfully!');
             setImageCategory('');
+            setImage(null);
+            setPreview(null);
+            e.target.value = '';
         }, 3000);
     };
 
-    const handleDeleteOfflineImage = (index) => {
+    const handleDeleteUploadedImage = (id) => {
         if (window.confirm('Are you sure you want to delete this image?')) {
-            const updatedImages = offlineImages.filter((_, i) => i !== index);
-            setOfflineImages(updatedImages);
-            localStorage.setItem('offlineImages', JSON.stringify(updatedImages));
+            const updatedImages = uploadedImages.filter((image) => image.id !== id);
+            setUploadedImages(updatedImages);
+            localStorage.setItem('uploadedImages', JSON.stringify(updatedImages));
+            setToastMessage('Image deleted.');
         }
     };
 
@@ -106,24 +99,21 @@ const ImageUpload = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload Image</h2>
-            
-            {/* Toast Message */}
+        <div className="max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Image Upload</h2>
+
             {toastMessage && (
                 <div className="p-4 mb-4 text-center text-white bg-green-500 rounded-md">
                     {toastMessage}
                 </div>
             )}
 
-            {/* File Input */}
             <input
                 type="file"
                 onChange={handleImageUpload}
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
 
-            {/* Image Preview */}
             {preview && (
                 <div className="mt-4">
                     <h3 className="text-lg font-medium text-gray-700">Preview:</h3>
@@ -135,7 +125,6 @@ const ImageUpload = () => {
                 </div>
             )}
 
-            {/* Image Category Selection */}
             <div className="mt-4">
                 <select
                     onChange={handleImageCategoryChange}
@@ -149,43 +138,42 @@ const ImageUpload = () => {
                 </select>
             </div>
 
-            {/* Loading Spinner */}
             {loading && (
                 <div className="mt-4 flex justify-center">
                     <div className="w-12 h-12 border-4 border-t-4 border-blue-500 rounded-full animate-spin"></div>
                 </div>
             )}
 
-            {/* Image Details Modal */}
             {showImageDetailsModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full"></div>
                         <h3 className="text-xl font-semibold mb-4">Image Details</h3>
-                        <p><strong>Dimensions:</strong> {imageDetails.dimensions}</p>
-                        <p><strong>File Size:</strong> {imageDetails.size}</p>
-                        <p><strong>Resolution:</strong> {imageDetails.resolution}</p>
+                        <p><strong>Name:</strong> {imageDetails.name}</p>
+                        <p><strong>Category:</strong> {imageDetails.category}</p>
                         <button onClick={closeImageDetailsModal} className="mt-4 w-full bg-blue-500 text-white py-2 rounded-md">
                             Close
                         </button>
                     </div>
-                </div>
             )}
 
-            {/* Offline Images List */}
-            {offlineImages.length > 0 && (
+            {uploadedImages.length > 0 && (
                 <div className="mt-6">
-                    <h3 className="text-xl font-semibold text-gray-700 mb-4">Offline Images</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {offlineImages.map((image, index) => (
-                            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                    <h3 className="text-xl font-semibold text-gray-700 mb-4">Uploaded Images</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        {uploadedImages.map((image) => (
+                            <div
+                                key={image.id}
+                                className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
+                            >
                                 <img
                                     src={image.data}
                                     alt={image.name}
-                                    className="w-full h-32 object-cover"
+                                    className="w-full h-40 object-cover"
                                 />
-                                <div className="p-4 flex justify-between items-center">
+                                <div className="p-4">
                                     <p className="text-sm font-medium text-gray-700 truncate">{image.name}</p>
-                                    <div className="flex items-center">
+                                    <p className="text-xs text-gray-500">{image.category}</p>
+                                    <div className="mt-2 flex justify-between items-center">
                                         <button
                                             onClick={() => showImageDetails(image)}
                                             className="text-blue-500 text-sm font-medium hover:underline"
@@ -193,8 +181,8 @@ const ImageUpload = () => {
                                             Details
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteOfflineImage(index)}
-                                            className="ml-2 text-red-500 text-sm font-medium hover:underline"
+                                            onClick={() => handleDeleteUploadedImage(image.id)}
+                                            className="text-red-500 text-sm font-medium hover:underline"
                                         >
                                             Delete
                                         </button>
