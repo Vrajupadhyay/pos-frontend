@@ -1,0 +1,68 @@
+.geo-location {
+  font-family: 'Arial', sans-serif;
+  padding: 16px;
+  max-width: 480px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.status {
+  padding: 10px 16px;
+  border-radius: 30px;
+  font-weight: 600;
+  width: fit-content;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.status.online {
+  background-color: #e0f8e9;
+  color: #1a7f3c;
+  border: 1px solid #1a7f3c;
+}
+
+.status.offline {
+  background-color: #ffeaea;
+  color: #d93025;
+  border: 1px solid #d93025;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.map {
+  height: 300px;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.location-info {
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
+  transform: translateY(0);
+}
+
+.location-info p {
+  margin: 0;
+  padding: 4px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.error {
+  padding: 12px;
+  background: #ffe6e6;
+  color: #d32f2f;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 500;
+}
