@@ -5,9 +5,13 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('https://pos-backend-rho-three.vercel.app/api/products')
-      .then(res => setProducts(res.data))
-      .catch(err => console.error(err));
+    // Simulating fake data
+    const fakeData = [
+      { id: 1, name: 'Milk', price: 50 },
+      { id: 2, name: 'Bread', price: 30 },
+      { id: 3, name: 'Butter', price: 80 },
+    ];
+    setProducts(fakeData);
   }, []);
 
   return (

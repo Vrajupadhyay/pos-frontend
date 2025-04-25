@@ -7,31 +7,43 @@ const OrderForm = () => {
   const [quantity, setQuantity] = useState('');
   const [orders, setOrders] = useState([]);
 
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get('https://pos-backend-rho-three.vercel.app/api/orders');
-      setOrders(res.data);
-    } catch (err) {
-      console.error('Error fetching orders', err);
-    }
-  };
+  // Fake initial order data
+  const fakeOrders = [
+    { order_id: 1, product_name: 'Milk', quantity: 2, username: 'John Doe' },
+    { order_id: 2, product_name: 'Cheese', quantity: 1, username: 'Jane Smith' },
+  ];
 
   useEffect(() => {
-    fetchOrders();
+    // Simulate fetching orders with fake data
+    setOrders(fakeOrders);
   }, []);
 
   const placeOrder = async () => {
     try {
-      const res = await axios.post('http://localhost:4000/orders', {
-        user_id: userId,
-        product_id: productId,
-        quantity
-      });
-      // clear the input fields
+      // Create a new order object
+      const newOrder = {
+        order_id: orders.length + 1, // Generate a fake order ID
+        product_name: `Product ${productId}`, // Simulate product name
+        quantity: parseInt(quantity, 10),
+        username: `User ${userId}`, // Simulate username
+      };
+
+      // Temporarily add the new order to the local state
+      setOrders([...orders, newOrder]);
+
+      // Clear the input fields
       setProductId('');
       setQuantity('');
-      alert('Order placed! ID: ' + res.data.orderId);
-      fetchOrders(); // Refresh the order list after placing an order
+
+      // Simulate a success message
+      alert('Order placed! ID: ' + newOrder.order_id);
+
+      // Optionally, you can still call the backend API here
+      // await axios.post('http://localhost:4000/orders', {
+      //   user_id: userId,
+      //   product_id: productId,
+      //   quantity
+      // });
     } catch (err) {
       alert('Error placing order');
     }
