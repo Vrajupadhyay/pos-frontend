@@ -5,7 +5,7 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:4000/products')
+    axios.get('https://pos-backend-rho-three.vercel.app/api/products')
       .then(res => setProducts(res.data))
       .catch(err => console.error(err));
   }, []);

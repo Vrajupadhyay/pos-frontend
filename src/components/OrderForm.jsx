@@ -9,7 +9,7 @@ const OrderForm = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get('http://localhost:4000/orders');
+      const res = await axios.get('https://pos-backend-rho-three.vercel.app/api/orders');
       setOrders(res.data);
     } catch (err) {
       console.error('Error fetching orders', err);
